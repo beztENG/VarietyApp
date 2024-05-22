@@ -10,80 +10,88 @@ import AllShopsScreen from './screens/AllShopsScreen';
 import ShopsByCategoryScreen from './screens/ShopsByCategoryScreen';
 import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from './screens/RegisterScreen';
+import ForgotPasswordScreen from './screens/ForgotPasswordScreen';
+import WelcomeScreen from './screens/WelcomeScreen';
 import { firebase } from './config';
 import Header from './components/header';
 import ProfileScreen from './screens/ProfileScreen';
 import LocationScreen from './screens/LocationScreen';
 
-
 const Stack = createNativeStackNavigator();
 
 export default function Navigation() {
   const [initializing, setInitializing] = useState(true);
-  const[user, setUser] = useState();
-  function onAuthStateChanged(user){
-    setUser(user) 
-    if(initializing) setInitializing(false)
+  const [user, setUser] = useState();
+
+  function onAuthStateChanged(user) {
+    setUser(user);
+    if (initializing) setInitializing(false);
   }
 
-  useEffect(() =>{
+  useEffect(() => {
     const subscriber = firebase.auth().onAuthStateChanged(onAuthStateChanged);
     return subscriber;
-  }, [])
+  }, []);
 
-  if(initializing) return null;
+  if (initializing) return null;
 
-  if(!user){
-    return(
-      <Stack.Navigator>
-            <Stack.Screen 
-            name="LoginScreen" 
-            component={LoginScreen} 
-            options={{
-              headerTitle: () => <Header name="Zinh"/>,
-              headerStyle: {
-                height: 150,
-                borderBottomLeftRadius:  50,
-                borderBottomRightRadius: 50,
-                backgroundColor: '#00c4d0',
-                shadowColor: '#000',
-                elevation: 25
-              }
-            }}
-            />
-            <Stack.Screen 
-            name="Register" 
-            component={RegisterScreen} 
-            options={{
-              headerTitle: () => <Header name="Zinh"/>,
-              headerStyle: {
-                height: 150,
-                borderBottomLeftRadius:  50,
-                borderBottomRightRadius: 50,
-                backgroundColor: '#00c4d0',
-                shadowColor: '#000',
-                elevation: 25
-              }
-            }}
-            />
+  if (!user) {
+    return (
+      <Stack.Navigator initialRouteName="Welcome">
+        <Stack.Screen name="Welcome" component={WelcomeScreen} />
+        <Stack.Screen 
+          name="LoginScreen" 
+          component={LoginScreen} 
+        />
+        <Stack.Screen 
+          name="Register" 
+          component={RegisterScreen} 
+          options={{
+            headerTitle: () => <Header name="Zinh" />,
+            headerStyle: {
+              height: 150,
+              borderBottomLeftRadius: 50,
+              borderBottomRightRadius: 50,
+              backgroundColor: '#00c4d0',
+              shadowColor: '#000',
+              elevation: 25,
+            },
+          }}
+        />
+        <Stack.Screen 
+          name="ForgotPassword" 
+          component={ForgotPasswordScreen} 
+          options={{
+            headerTitle: () => <Header name="Zinh" />,
+            headerStyle: {
+              height: 150,
+              borderBottomLeftRadius: 50,
+              borderBottomRightRadius: 50,
+              backgroundColor: '#00c4d0',
+              shadowColor: '#000',
+              elevation: 25,
+            },
+          }}
+        />
       </Stack.Navigator>
     );
   }
-  
-  return(
-    <Stack.Navigator>
-          <Stack.Screen name="Home" component={HomeScreen} />
-          <Stack.Screen name="Shop" component={ShopScreen} />
-          <Stack.Screen name="Cart" options={{presentation: 'modal'}} component={CartScreen} />
-          <Stack.Screen name="AllShopsScreen" component={AllShopsScreen} />
-          <Stack.Screen name="ShopsByCategory" component={ShopsByCategoryScreen}/>
-          <Stack.Screen name="OrderPreparing" options={{presentation: 'fullScreenModal'}} component={OrderPreparingScreen} />
-          <Stack.Screen name="Delivery" options={{presentation: 'fullScreenModal'}} component={DeliveryScreen} />
-          <Stack.Screen name="LoginScreen" component={LoginScreen} />
-          <Stack.Screen name="Register" component={RegisterScreen} /> 
-          <Stack.Screen name="Profile" component={ProfileScreen}/>
-          <Stack.Screen name="Location" options={{presentation: 'modal'}}  component={LocationScreen} />
+
+  return (
+    <Stack.Navigator initialRouteName="Home">
+      <Stack.Screen name="Home" component={HomeScreen} />
+      <Stack.Screen name="Shop" component={ShopScreen} />
+      <Stack.Screen name="Cart" options={{ presentation: 'modal' }} component={CartScreen} />
+      <Stack.Screen name="AllShopsScreen" component={AllShopsScreen} />
+      <Stack.Screen name="ShopsByCategory" component={ShopsByCategoryScreen} />
+      <Stack.Screen name="OrderPreparing" options={{ presentation: 'fullScreenModal' }} component={OrderPreparingScreen} />
+      <Stack.Screen name="Delivery" options={{ presentation: 'fullScreenModal' }} component={DeliveryScreen} />
+      <Stack.Screen name="LoginScreen" component={LoginScreen} />
+      <Stack.Screen name="Register" component={RegisterScreen} />
+      <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
+      <Stack.Screen name="Profile" component={ProfileScreen} />
+      <Stack.Screen name="Location" options={{ presentation: 'modal' }} component={LocationScreen} />
+      <Stack.Screen name="Welcome" component={WelcomeScreen} />
     </Stack.Navigator>
   );
 }
-

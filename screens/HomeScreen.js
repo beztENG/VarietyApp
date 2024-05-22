@@ -41,10 +41,6 @@ export default function HomeScreen() {
               value={searchQuery}
               onChangeText={handleSearch}
             />
-            <View className="flex-row items-center bg-gray-100 py-2 px-3">
-              <Icon.MapPin height="20" width="20" stroke="gray" />
-              <Text className="text-gray-600 ml-1">New York, NYC</Text>
-            </View>
           </View>
           <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
             <Icon.User height="25" width="25" stroke="gray" />

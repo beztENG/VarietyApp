@@ -1,9 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, Button, Image, StyleSheet, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, Image, Alert, StyleSheet } from 'react-native';
 import { firebase } from '../config';
 import { useNavigation } from '@react-navigation/native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import * as ImagePicker from 'expo-image-picker';
+import * as Icon from 'react-native-feather';
 import mime from 'mime';
+import { themeColors } from '../themes';
 
 export default function ProfileScreen() {
   const [user, setUser] = useState(null);
@@ -39,12 +42,8 @@ export default function ProfileScreen() {
         quality: 1,
       });
   
-      console.log('Full Image Picker Result:', result); // Log the entire result object
-  
       if (!result.cancelled) {
         const imageUri = result.uri || (result.assets && result.assets[0]?.uri); 
-        console.log('Picked image URI:', imageUri); 
-  
         if (imageUri) {
           await uploadImage(imageUri); 
         } else {
@@ -81,7 +80,6 @@ export default function ProfileScreen() {
         async () => {
           const downloadURL = await storageRef.getDownloadURL();
           updateUserProfileImage(downloadURL);
-          console.log('Image uploaded successfully:', downloadURL);
         }
       );
     } catch (error) {
@@ -127,20 +125,26 @@ export default function ProfileScreen() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Profile</Text>
-      <TouchableOpacity onPress={pickImage}>
-        {profileImage ? (
-          <Image source={{ uri: profileImage }} style={styles.profileImage} />
-        ) : (
-          <View style={styles.profileImagePlaceholder}>
-            <Text style={styles.profileImageText}>Add Image</Text>
-          </View>
-        )}
-      </TouchableOpacity>
-      <Text style={styles.info}>First Name: {user.firstName}</Text>
-      <Text style={styles.info}>Last Name: {user.lastName}</Text>
-      <Text style={styles.info}>Email: {user.email}</Text>
-      <Button title="Logout" onPress={logout} />
+      <SafeAreaView style={styles.safeArea}>
+        <TouchableOpacity className="bg-yellow-400 p-2 rounded-tr-2xl rounded-bl-2xl ml-4" onPress={() => navigation.goBack()} style={styles.backButton}>
+          <Icon.ArrowLeft strokeWidth={3} stroke={themeColors.bgColor(1)} />
+        </TouchableOpacity>
+        <TouchableOpacity onPress={pickImage} style={styles.profileImageContainer}>
+          {profileImage ? (
+            <Image source={{ uri: profileImage }} style={styles.profileImage} />
+          ) : (
+            <View style={styles.profileImagePlaceholder}>
+              <Text style={styles.profileImageText}>Add Image</Text>
+            </View>
+          )}
+        </TouchableOpacity>
+        <Text style={styles.info}>First Name: {user.firstName}</Text>
+        <Text style={styles.info}>Last Name: {user.lastName}</Text>
+        <Text style={styles.info}>Email: {user.email}</Text>
+        <TouchableOpacity onPress={logout} style={styles.logoutButton}>
+          <Text style={styles.logoutButtonText}>Logout</Text>
+        </TouchableOpacity>
+      </SafeAreaView>
     </View>
   );
 }
@@ -148,25 +152,26 @@ export default function ProfileScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    backgroundColor: '#fff',
+  },
+  safeArea: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 20,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 16,
-    textAlign: 'center',
+  backButton: {
+    position: 'absolute',
+    top: 20,
+    left: 20,
   },
-  info: {
-    fontSize: 18,
-    marginBottom: 8,
+  profileImageContainer: {
+    marginBottom: 20,
   },
   profileImage: {
     width: 100,
     height: 100,
     borderRadius: 50,
-    marginBottom: 16,
   },
   profileImagePlaceholder: {
     width: 100,
@@ -175,9 +180,25 @@ const styles = StyleSheet.create({
     backgroundColor: '#ddd',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
   },
   profileImageText: {
     color: '#888',
+  },
+  info: {
+    fontSize: 18,
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  logoutButton: {
+    marginTop: 20,
+    backgroundColor: '#00c4d0',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 8,
+  },
+  logoutButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: 'bold',
   },
 });

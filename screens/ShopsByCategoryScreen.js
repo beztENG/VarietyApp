@@ -3,6 +3,7 @@ import { Text, View, ScrollView, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import ShopCard2 from '../components/ShopCard2';
 import { getShopsByCategory } from '../api'; // Import hàm lấy shop theo category
+import { themeColors } from '../themes';
 
 export default function ShopsByCategoryScreen({ route }) {
   const navigation = useNavigation();
@@ -24,11 +25,11 @@ export default function ShopsByCategoryScreen({ route }) {
   };
 
   return (
-    <View>
-      <ScrollView>
-        <View className="flex-wrap justify-around p-4">
+    <View style={{ flex: 1, backgroundColor: themeColors.bgColor() }}>
+      <ScrollView contentContainerStyle={{ paddingVertical: 20, paddingHorizontal: 15 }}>
+        <View >
           {shops.map((shop, index) => (
-            <TouchableOpacity key={index} onPress={() => handleShopPress(shop)}>
+            <TouchableOpacity key={index} onPress={() => handleShopPress(shop)} style={{ marginBottom: 20 }}>
               <ShopCard2 item={shop} />
             </TouchableOpacity>
           ))}
