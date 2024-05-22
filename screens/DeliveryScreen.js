@@ -1,9 +1,10 @@
+import React, { useEffect, useState } from 'react';
 import { Text, View, TouchableOpacity, Image } from 'react-native';
-import React from 'react';
+import MapView, { Marker, Polyline } from 'react-native-maps';
+import axios from 'axios';
 import { themeColors } from '../themes';
 import * as Icon from 'react-native-feather';
 import { useNavigation } from '@react-navigation/native';
-import MapView, { Marker } from 'react-native-maps';
 import { useDispatch, useSelector } from 'react-redux';
 import { selectShop } from '../redux/shopSlice';
 import { EmptyCart } from '../redux/cartSlice';
@@ -13,6 +14,26 @@ export default function DeliveryScreen({ route }) {
     const navigation = useNavigation();
     const dispatch = useDispatch();
     const { userLocation } = route.params;
+    const [routeCoords, setRouteCoords] = useState([]);
+
+    useEffect(() => {
+        const getRoute = async () => {
+            const apiKey = '5b3ce3597851110001cf62484341afd485c44ea1aef0c6e26f71869b';
+            const url = `https://api.openrouteservice.org/v2/directions/driving-car?api_key=${apiKey}&start=${shop.lng},${shop.lat}&end=${userLocation.longitude},${userLocation.latitude}`;
+            try {
+                const response = await axios.get(url);
+                const coordinates = response.data.features[0].geometry.coordinates.map(coord => ({
+                    latitude: coord[1],
+                    longitude: coord[0]
+                }));
+                setRouteCoords(coordinates);
+            } catch (error) {
+                console.error('Error fetching route:', error);
+            }
+        };
+
+        getRoute();
+    }, [shop, userLocation]);
 
     const cancelOrder = () => {
         navigation.navigate('Home');
@@ -21,7 +42,6 @@ export default function DeliveryScreen({ route }) {
 
     return (
         <View className="flex-1">
-            {/* Map view */}
             <MapView
                 initialRegion={{
                     latitude: (shop.lat + userLocation.latitude) / 2,
@@ -49,6 +69,13 @@ export default function DeliveryScreen({ route }) {
                     title="Your Location"
                     pinColor="blue"
                 />
+                {routeCoords.length > 0 && (
+                    <Polyline
+                        coordinates={routeCoords}
+                        strokeColor={themeColors.bgColor(1)}
+                        strokeWidth={5}
+                    />
+                )}
             </MapView>
 
             <View className="rounded-t-3xl -mt-12 bg-white relative">
