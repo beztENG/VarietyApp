@@ -24,6 +24,10 @@ export default function HomeScreen() {
     setSearchQuery(text);
   };
 
+  const clearSearch = () => {
+    setSearchQuery('');
+  };
+
   const filterShopsByName = (shops, query) => {
     return shops.filter(shop => shop.name.toLowerCase().includes(query.toLowerCase()));
   };
@@ -41,6 +45,11 @@ export default function HomeScreen() {
               value={searchQuery}
               onChangeText={handleSearch}
             />
+            {searchQuery !== '' && (
+              <TouchableOpacity onPress={clearSearch}>
+                <Icon.X height="20" width="20" stroke="gray" className="mr-3" />
+              </TouchableOpacity>
+            )}
           </View>
           <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
             <Icon.User height="25" width="25" stroke="gray" />

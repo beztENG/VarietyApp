@@ -81,8 +81,7 @@ export default function DeliveryScreen({ route }) {
             <View className="rounded-t-3xl -mt-12 bg-white relative">
                 <View className="flex-row justify-between px-5 pt-10">
                     <View>
-                        <Text className="text-lg text-gray-700 font-semibold">Estimated Arrival</Text>
-                        <Text className="text-3xl font-extrabold text-gray-700">20-30 minutes</Text>
+                        <Text className="text-3xl font-extrabold text-gray-700">Ordering ready</Text>
                         <Text className="mt-2 text-gray-700 font-semibold">Your order is on the way</Text>
                     </View>
                     <Image className="w-24 h-24" source={require('../assets/images/bikeGuy2.gif')} />

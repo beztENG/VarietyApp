@@ -32,7 +32,7 @@ export default function ShopCard({ item }) {
                     </View>
                     <View className="flex-row items-center space-x-1">
                         <Icon.MapPin color="gray" width="15" height="15"/>
-                        <Text className="text-gray-700 text-xs">Nearby• {item.address}</Text>
+                        <Text className="text-gray-700 text-xs">• {item.address}</Text>
                     </View>
                 </View>
             </View>

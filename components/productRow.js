@@ -11,12 +11,14 @@ export default function ProductRow({ item }) {
     const totalItems = useSelector(state => selectCartItemsById(state, item._id));
 
     const handleIncrease = () => {
-        dispatch(addToCart({ ...item }))
-    }
+        dispatch(addToCart({ ...item }));
+    };
 
     const handleDecrease = () => {
-        dispatch(RemoveFromCart({ id: item.id }))
-    }
+        if (totalItems.length > 0) {
+            dispatch(RemoveFromCart({ _id: item._id }));
+        }
+    };
 
     return (
         <View className="flex-row items-center bg-white p-5 rounded-3xl shadow-md mb-5 mx-5">
@@ -34,7 +36,7 @@ export default function ProductRow({ item }) {
                         >
                             <Icon.Minus width={20} height={20} stroke={'white'} />
                         </TouchableOpacity>
-                        <Text className="text-lg">{totalItems.length}</Text>
+                        <Text className="text-lg">{totalItems.reduce((total, item) => total + item.quantity, 0)}</Text>
                         <TouchableOpacity
                             onPress={handleIncrease}
                             style={{backgroundColor: themeColors.bgColor(1)}}
@@ -46,5 +48,5 @@ export default function ProductRow({ item }) {
                 </View>
             </View>
         </View>
-    )
+    );
 }
