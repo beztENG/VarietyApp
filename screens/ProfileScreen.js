@@ -1,39 +1,52 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, TouchableOpacity, Image, Alert, StyleSheet } from 'react-native';
-import { firebase } from '../config';
-import { useNavigation } from '@react-navigation/native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import * as ImagePicker from 'expo-image-picker';
-import * as Icon from 'react-native-feather';
+import React, { useState, useEffect, useCallback } from "react";
+import { View, Text, TouchableOpacity, Image, TextInput, Alert, ScrollView } from "react-native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import { firebase } from "../config";
+import { SafeAreaView } from "react-native-safe-area-context";
+import * as ImagePicker from "expo-image-picker";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import mime from 'mime';
-import { themeColors } from '../themes';
 
 export default function ProfileScreen() {
-  const [user, setUser] = useState(null);
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
+  const [email, setEmail] = useState('');
   const [profileImage, setProfileImage] = useState(null);
   const navigation = useNavigation();
 
-  useEffect(() => {
-    const fetchUserData = async () => {
-      const currentUser = firebase.auth().currentUser;
-      if (currentUser) {
-        try {
-          const document = await firebase.firestore().collection('users').doc(currentUser.uid).get();
-          if (document.exists) {
-            const userData = document.data();
-            setUser(userData);
-            setProfileImage(userData.profileImage);
-          }
-        } catch (error) {
-          console.error("Error fetching user data: ", error);
+  const fetchUserData = async () => {
+    try {
+      const userString = await AsyncStorage.getItem('user');
+      console.log("Fetched userString from AsyncStorage:", userString); 
+      const user = userString ? JSON.parse(userString) : null;
+      console.log("Parsed user data:", user); 
+      if (user != null) {
+        setEmail(user.email);
+        const doc = await firebase.firestore().collection('users').doc(user.uid).get();
+        if (doc.exists) {
+          const data = doc.data();
+          setFirstName(data.firstName);
+          setLastName(data.lastName);
+          setProfileImage(data.profileImage);
+        } else {
+          console.log("No document found for user");
         }
+      } else {
+        console.log("No user found in AsyncStorage");
       }
-    };
+    } catch (error) {
+      console.error("Error fetching user data: ", error);
+    }
+  };
+  
 
-    fetchUserData();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchUserData();
+    }, [])
+  );
 
-  const pickImage = async () => {
+  const handleImagePick = async () => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
         mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -43,12 +56,19 @@ export default function ProfileScreen() {
       });
   
       if (!result.cancelled) {
-        const imageUri = result.uri || (result.assets && result.assets[0]?.uri); 
-        if (imageUri) {
-          await uploadImage(imageUri); 
+        const userString = await AsyncStorage.getItem('user');
+        if (userString) {
+          const user = JSON.parse(userString);
+          const uid = user.uid;
+          const imageUri = result.uri || (result.assets && result.assets[0]?.uri); 
+          if (imageUri) {
+            await uploadImage(imageUri, uid); 
+          } else {
+            console.error('No image URI found in the picker result.');
+            Alert.alert('Error', 'Could not get the image URI. Please try again.');
+          }
         } else {
-          console.error('No image URI found in the picker result.');
-          Alert.alert('Error', 'Could not get the image URI. Please try again.');
+          Alert.alert("User data not found in AsyncStorage!");
         }
       }
     } catch (error) {
@@ -56,30 +76,29 @@ export default function ProfileScreen() {
       Alert.alert('Error picking image', 'An error occurred while picking the image.');
     }
   };
+  
 
-  const uploadImage = async (uri) => {
-    const currentUser = firebase.auth().currentUser;
-    if (!currentUser) return;
-
+  const uploadImage = async (uri, uid) => {
     try {
       const response = await fetch(uri);
       const blob = await response.blob();
-
-      const mimeType = mime.getType(uri);
-      const fileExtension = mimeType.split('/')[1];
-      const storageRef = firebase.storage().ref().child(`profileImages/${currentUser.uid}.${fileExtension}`);
-
+  
+      const storageRef = firebase.storage().ref().child(`profileImages/${uid}`);
+  
       const uploadTask = storageRef.put(blob);
-
+  
       uploadTask.on(
         'state_changed',
-        (snapshot) => {},
+        (snapshot) => {
+          // Có thể thực hiện các hành động theo tiến trình tải lên ở đây nếu cần
+        },
         (error) => {
           Alert.alert('Error uploading image', error.message);
         },
         async () => {
-          const downloadURL = await storageRef.getDownloadURL();
-          updateUserProfileImage(downloadURL);
+          // Tải ảnh lên thành công, cập nhật URL hình ảnh mới
+          const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+          updateUserProfileImage(downloadURL, uid);
         }
       );
     } catch (error) {
@@ -87,118 +106,97 @@ export default function ProfileScreen() {
       Alert.alert('Error uploading image', 'An error occurred while uploading the image.');
     }
   };
+  
 
-  const updateUserProfileImage = (downloadURL) => {
-    const currentUser = firebase.auth().currentUser;
-    if (!currentUser) return;
-
+  const updateUserProfileImage = (downloadURL, uid) => {
     firebase.firestore().collection('users')
-      .doc(currentUser.uid)
+      .doc(uid)
       .update({
         profileImage: downloadURL,
       })
       .then(() => {
+        // Cập nhật thành công, cập nhật hình ảnh trên giao diện
         setProfileImage(downloadURL);
         Alert.alert('Profile image updated successfully');
       })
       .catch((error) => {
+        // Xảy ra lỗi khi cập nhật
         Alert.alert('Error updating profile image', error.message);
       });
   };
+  
 
-  const logout = () => {
-    firebase.auth().signOut()
-      .then(() => {
-        navigation.reset({
-          index: 0,
-          routes: [{ name: 'LoginScreen' }],
+
+  const handleUpdateProfile = async () => {
+    try {
+      const userString = await AsyncStorage.getItem('user');
+      console.log("Fetched userString from AsyncStorage:", userString); 
+      const user = userString ? JSON.parse(userString) : null;
+      console.log("Parsed user data:", user);
+      if (user != null){
+        await firebase.firestore().collection('users').doc(user.uid).update({
+          firstName,
+          lastName,
+          email,
         });
-      })
-      .catch((error) => {
-        Alert.alert('Error logging out', error.message);
-      });
+        Alert.alert("Profile updated successfully!");
+      }else{
+        console.log("No user found in AsyncStorage");
+      }
+    } catch (error) {
+      Alert.alert("Error updating profile:", error.message);
+    }
   };
 
-  if (!user) {
-    return <Text>Loading...</Text>;
-  }
+  const handleLogout = async () => {
+    await firebase.auth().signOut();
+    await AsyncStorage.setItem('isLoggedIn', JSON.stringify(false));
+    await AsyncStorage.removeItem('user');
+    navigation.navigate('Welcome');
+  };
 
   return (
-    <View style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <TouchableOpacity className="bg-yellow-400 p-2 rounded-tr-2xl rounded-bl-2xl ml-4" onPress={() => navigation.goBack()} style={styles.backButton}>
-          <Icon.ArrowLeft strokeWidth={3} stroke={themeColors.bgColor(1)} />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={pickImage} style={styles.profileImageContainer}>
-          {profileImage ? (
-            <Image source={{ uri: profileImage }} style={styles.profileImage} />
-          ) : (
-            <View style={styles.profileImagePlaceholder}>
-              <Text style={styles.profileImageText}>Add Image</Text>
-            </View>
-          )}
-        </TouchableOpacity>
-        <Text style={styles.info}>First Name: {user.firstName}</Text>
-        <Text style={styles.info}>Last Name: {user.lastName}</Text>
-        <Text style={styles.info}>Email: {user.email}</Text>
-        <TouchableOpacity onPress={logout} style={styles.logoutButton}>
-          <Text style={styles.logoutButtonText}>Logout</Text>
-        </TouchableOpacity>
-      </SafeAreaView>
-    </View>
+    <SafeAreaView className="flex-1 bg-white">
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }} className="p-4">
+        <View className="flex-row justify-center mb-5">
+          <TouchableOpacity onPress={handleImagePick}>
+            <Image 
+              source={profileImage ? { uri: profileImage } : require('../assets/images/profilePlaceholder.png')}
+              style={{ width: 100, height: 100, borderRadius: 50 }}
+            />
+          </TouchableOpacity>
+        </View>
+        <View className="form space-y-2">
+          <Text className="text-gray-700 ml-4">First Name:</Text>
+          <TextInput
+            className="p-4 bg-gray-100 text-gray-700 rounded-2xl mb-3"
+            placeholder="First Name"
+            value={firstName}
+            onChangeText={setFirstName}
+          />
+          <Text className="text-gray-700 ml-4">Last Name:</Text>
+          <TextInput
+            className="p-4 bg-gray-100 text-gray-700 rounded-2xl mb-3"
+            placeholder="Last Name"
+            value={lastName}
+            onChangeText={setLastName}
+          />
+          <Text className="text-gray-700 ml-4">Email Address:</Text>
+          <TextInput
+            className="p-4 bg-gray-100 text-gray-700 rounded-2xl mb-3"
+            placeholder="Email"
+            value={email}
+            onChangeText={setEmail}
+            editable={false}
+          />
+          <TouchableOpacity className="py-3 bg-yellow-400 rounded-xl mt-5" onPress={handleUpdateProfile}>
+            <Text className="font-xl font-bold text-center text-gray-700">Update Profile</Text>
+          </TouchableOpacity>
+          <TouchableOpacity className="py-3 bg-red-400 rounded-xl mt-5" onPress={handleLogout}>
+            <Text className="font-xl font-bold text-center text-white">Logout</Text>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-  },
-  safeArea: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-  },
-  backButton: {
-    position: 'absolute',
-    top: 20,
-    left: 20,
-  },
-  profileImageContainer: {
-    marginBottom: 20,
-  },
-  profileImage: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-  },
-  profileImagePlaceholder: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: '#ddd',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  profileImageText: {
-    color: '#888',
-  },
-  info: {
-    fontSize: 18,
-    marginBottom: 10,
-    textAlign: 'center',
-  },
-  logoutButton: {
-    marginTop: 20,
-    backgroundColor: '#00c4d0',
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 8,
-  },
-  logoutButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-});

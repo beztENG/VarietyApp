@@ -1,5 +1,6 @@
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import React, { useEffect, useState } from 'react';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import HomeScreen from './screens/HomeScreen';
 import ShopScreen from './screens/ShopScreen';
@@ -12,25 +13,40 @@ import LoginScreen from './screens/LoginScreen';
 import RegisterScreen from './screens/RegisterScreen';
 import ForgotPasswordScreen from './screens/ForgotPasswordScreen';
 import WelcomeScreen from './screens/WelcomeScreen';
-import { firebase } from './config';
-import Header from './components/header';
 import ProfileScreen from './screens/ProfileScreen';
 import LocationScreen from './screens/LocationScreen';
+import { firebase } from './config';
+import Header from './components/header';
 
 const Stack = createNativeStackNavigator();
 
 export default function Navigation() {
   const [initializing, setInitializing] = useState(true);
-  const [user, setUser] = useState();
+  const [user, setUser] = useState(null);
 
-  function onAuthStateChanged(user) {
+  const onAuthStateChanged = async (user) => {
     setUser(user);
+    if (user) {
+      await AsyncStorage.setItem('user', JSON.stringify(user));
+    } else {
+      await AsyncStorage.removeItem('user');
+    }
     if (initializing) setInitializing(false);
-  }
+  };
 
   useEffect(() => {
-    const subscriber = firebase.auth().onAuthStateChanged(onAuthStateChanged);
-    return subscriber;
+    const checkUser = async () => {
+      const storedUser = await AsyncStorage.getItem('user');
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+        setInitializing(false);
+      } else {
+        const subscriber = firebase.auth().onAuthStateChanged(onAuthStateChanged);
+        return subscriber; // unsubscribe on unmount
+      }
+    };
+
+    checkUser();
   }, []);
 
   if (initializing) return null;
@@ -39,10 +55,7 @@ export default function Navigation() {
     return (
       <Stack.Navigator initialRouteName="Welcome">
         <Stack.Screen name="Welcome" component={WelcomeScreen} />
-        <Stack.Screen 
-          name="LoginScreen" 
-          component={LoginScreen} 
-        />
+        <Stack.Screen name="LoginScreen" component={LoginScreen} />
         <Stack.Screen 
           name="Register" 
           component={RegisterScreen} 

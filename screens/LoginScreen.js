@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect } from "react";import { 
+import React, { useState, useRef, useEffect } from "react";
+import { 
   View, 
   Text, 
   TouchableOpacity, 
@@ -8,12 +9,14 @@ import React, { useState, useRef, useEffect } from "react";import {
   Platform, 
   ScrollView,
   Keyboard, 
+  Alert,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { firebase } from "../config";
 import { themeColors } from "../themes";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as Icon from "react-native-feather";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginScreen() {
   const navigation = useNavigation();
@@ -24,23 +27,24 @@ export default function LoginScreen() {
   const loginUser = async (email, password) => {
     try {
       await firebase.auth().signInWithEmailAndPassword(email, password);
+      const user = firebase.auth().currentUser;
+      await AsyncStorage.setItem('user', JSON.stringify(user));
       navigation.navigate('Home');
     } catch (error) {
-      alert(error.message);
+      Alert.alert('Login Error', error.message);
     }
   };
 
-    // Scroll to the bottom when the keyboard appears
-    useEffect(() => {
-      const keyboardDidShowListener = Keyboard.addListener(
-        'keyboardDidShow',
-        () => {
-          scrollViewRef.current?.scrollToEnd({ animated: true }); // Scroll to the end
-        }
-      );
-  
-      return () => keyboardDidShowListener.remove();
-    }, []);
+  // Scroll to the bottom when the keyboard appears
+  useEffect(() => {
+    const keyboardDidShowListener = Keyboard.addListener(
+      'keyboardDidShow',
+      () => {
+        scrollViewRef.current?.scrollToEnd({ animated: true }); // Scroll to the end
+      }
+    );
+    return () => keyboardDidShowListener.remove();
+  }, []);
 
   return (
     <KeyboardAvoidingView 
@@ -63,7 +67,7 @@ export default function LoginScreen() {
             <Image source={require("../assets/images/welcome.png")} style={{width: 200, height: 200}}/>
           </View>
         </SafeAreaView>
-        <View className="flex-1 bg-white px-8 pl-8" style = {{borderTopLeftRadius: 50, borderTopRightRadius: 50}}>
+        <View className="flex-1 bg-white px-8 pl-8" style={{borderTopLeftRadius: 50, borderTopRightRadius: 50}}>
           <View className="form space-y-2">
             <Text className="text-gray-700 ml-4">Email Address : </Text>
             <TextInput
@@ -97,4 +101,4 @@ export default function LoginScreen() {
       </ScrollView>
     </KeyboardAvoidingView>
   );
-};
+}

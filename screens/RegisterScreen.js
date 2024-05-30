@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect } from "react";import { 
+import React, { useState, useRef, useEffect } from "react";
+import { 
   View, 
   Text, 
   TouchableOpacity, 
@@ -21,19 +22,41 @@ export default function RegisterScreen() {
   const [password, setPassword] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
-  const scrollViewRef = useRef(null); // Reference for the ScrollView
+  const [verificationSent, setVerificationSent] = useState(false);
+  const scrollViewRef = useRef(null);
 
-
-  // Scroll to the bottom when the keyboard appears
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       'keyboardDidShow',
-        () => {
-        scrollViewRef.current?.scrollToEnd({ animated: true }); // Scroll to the end
+      () => {
+        scrollViewRef.current?.scrollToEnd({ animated: true });
       }
     );
     return () => keyboardDidShowListener.remove();
   }, []);
+
+  useEffect(() => {
+    if (verificationSent) {
+      const checkEmailVerification = setInterval(async () => {
+        await firebase.auth().currentUser.reload();
+        const isVerified = firebase.auth().currentUser.emailVerified;
+        if (isVerified) {
+          clearInterval(checkEmailVerification);
+          await firebase.firestore().collection('users')
+            .doc(firebase.auth().currentUser.uid)
+            .set({
+              firstName,
+              lastName,
+              email,
+              profileImage: null,
+            });
+          alert('Email verified and user data set!');
+          navigation.navigate('LoginScreen');
+        }
+      }, 1000);
+      return () => clearInterval(checkEmailVerification);
+    }
+  }, [verificationSent]);
 
   const registerUser = async (email, password, firstName, lastName) => {
     try {
@@ -42,17 +65,8 @@ export default function RegisterScreen() {
         handleCodeInApp: true,
         url: 'https://varietyapp-90383.firebaseapp.com',
       });
+      setVerificationSent(true);
       alert('Verification email sent');
-
-      await firebase.firestore().collection('users')
-        .doc(firebase.auth().currentUser.uid)
-        .set({
-          firstName,
-          lastName,
-          email,
-          profileImage: null,
-        });
-      navigation.navigate('LoginScreen');
     } catch (error) {
       alert(error.message);
     }
@@ -64,7 +78,7 @@ export default function RegisterScreen() {
       keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 0}
       className="flex-1 bg-white" style={{ backgroundColor: themeColors.bgColor(1) }}>
       <ScrollView 
-        ref={scrollViewRef} // Attach the reference to the ScrollView
+        ref={scrollViewRef}
         contentContainerStyle={{ flexGrow: 1 }}>
         <SafeAreaView className="flex">
           <View className="flex-row justify-start">
@@ -73,7 +87,7 @@ export default function RegisterScreen() {
               className="bg-yellow-400 p-2 rounded-tr-2xl rounded-bl-2xl ml-4"
             >
               <Icon.ArrowLeft strokeWidth={3} stroke={themeColors.bgColor(1)} />
-            </TouchableOpacity>
+              </TouchableOpacity>
           </View>
           <View className="flex-row justify-center">
             <Image source={require("../assets/images/welcome.png")} style={{ width: 200, height: 200 }} />
