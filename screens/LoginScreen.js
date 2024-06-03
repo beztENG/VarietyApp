@@ -22,7 +22,7 @@ export default function LoginScreen() {
   const navigation = useNavigation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const scrollViewRef = useRef(null); // Reference for the ScrollView
+  const scrollViewRef = useRef(null); 
 
   const loginUser = async (email, password) => {
     try {
@@ -35,12 +35,12 @@ export default function LoginScreen() {
     }
   };
 
-  // Scroll to the bottom when the keyboard appears
+
   useEffect(() => {
     const keyboardDidShowListener = Keyboard.addListener(
       'keyboardDidShow',
       () => {
-        scrollViewRef.current?.scrollToEnd({ animated: true }); // Scroll to the end
+        scrollViewRef.current?.scrollToEnd({ animated: true });
       }
     );
     return () => keyboardDidShowListener.remove();
@@ -52,7 +52,7 @@ export default function LoginScreen() {
       keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
       className="flex-1 bg-white" style={{ backgroundColor: themeColors.bgColor(1) }}>
       <ScrollView 
-        ref={scrollViewRef} // Attach the reference to the ScrollView
+        ref={scrollViewRef} 
         contentContainerStyle={{ flexGrow: 1 }}>
         <SafeAreaView className="flex">
           <View className="flex-row justify-start">

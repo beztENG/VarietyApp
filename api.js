@@ -1,4 +1,4 @@
-import SanityClient, { uploadImage } from './sanity';
+import SanityClient, { urlFor } from './sanity';
 
 let sanityQuery = (query, params) => SanityClient.fetch(query, params);
 
@@ -68,4 +68,6 @@ export const getShopsByCategory = async (categoryId) => {
   }
 };
 
-
+export const getImageUrl = (image) => {
+  return urlFor(image).url();
+};

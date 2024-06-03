@@ -91,7 +91,7 @@ export default function CartScreen() {
                 </View>
                 <View>
                     <TouchableOpacity
-                        onPress={() => navigation.navigate('Location')}
+                        onPress={() => navigation.navigate('Location', { shopName: shop.name })}
                         style={{ backgroundColor: themeColors.bgColor(1) }}
                         className="p-3 rounded-full"
                     >

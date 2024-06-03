@@ -5,7 +5,8 @@ import { firebase } from "../config";
 import { SafeAreaView } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import mime from 'mime';
+import * as Icon from "react-native-feather";
+import { themeColors } from "../themes";
 
 export default function ProfileScreen() {
   const [firstName, setFirstName] = useState('');
@@ -130,9 +131,9 @@ export default function ProfileScreen() {
   const handleUpdateProfile = async () => {
     try {
       const userString = await AsyncStorage.getItem('user');
-      console.log("Fetched userString from AsyncStorage:", userString); 
+      // console.log("Fetched userString from AsyncStorage:", userString);  
       const user = userString ? JSON.parse(userString) : null;
-      console.log("Parsed user data:", user);
+      // console.log("Parsed user data:", user);
       if (user != null){
         await firebase.firestore().collection('users').doc(user.uid).update({
           firstName,
@@ -196,6 +197,9 @@ export default function ProfileScreen() {
             <Text className="font-xl font-bold text-center text-white">Logout</Text>
           </TouchableOpacity>
         </View>
+        <TouchableOpacity onPress={() => navigation.navigate('HistoryPurchase')} className="mt-4 p-3 rounded-full bg-green-500">
+          <Text className="text-white text-center font-bold text-lg">View Purchase History</Text>
+        </TouchableOpacity> 
       </ScrollView>
     </SafeAreaView>
   );

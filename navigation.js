@@ -17,6 +17,7 @@ import ProfileScreen from './screens/ProfileScreen';
 import LocationScreen from './screens/LocationScreen';
 import { firebase } from './config';
 import Header from './components/header';
+import HistoryPurchaseScreen from './screens/HistoryPurchaseScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -54,8 +55,8 @@ export default function Navigation() {
   if (!user) {
     return (
       <Stack.Navigator initialRouteName="Welcome">
-        <Stack.Screen name="Welcome" component={WelcomeScreen} />
-        <Stack.Screen name="LoginScreen" component={LoginScreen} />
+        <Stack.Screen name="Welcome" component={WelcomeScreen}  options={{headerShown: false}}/>
+        <Stack.Screen name="LoginScreen" component={LoginScreen} options={{headerShown: false}}/>
         <Stack.Screen 
           name="Register" 
           component={RegisterScreen} 
@@ -69,6 +70,7 @@ export default function Navigation() {
               shadowColor: '#000',
               elevation: 25,
             },
+            headerShown: false
           }}
         />
         <Stack.Screen 
@@ -84,6 +86,7 @@ export default function Navigation() {
               shadowColor: '#000',
               elevation: 25,
             },
+            headerShown: false
           }}
         />
       </Stack.Navigator>
@@ -92,19 +95,20 @@ export default function Navigation() {
 
   return (
     <Stack.Navigator initialRouteName="Home">
-      <Stack.Screen name="Home" component={HomeScreen} />
-      <Stack.Screen name="Shop" component={ShopScreen} />
-      <Stack.Screen name="Cart" options={{ presentation: 'modal' }} component={CartScreen} />
-      <Stack.Screen name="AllShopsScreen" component={AllShopsScreen} />
-      <Stack.Screen name="ShopsByCategory" component={ShopsByCategoryScreen} />
-      <Stack.Screen name="OrderPreparing" options={{ presentation: 'fullScreenModal' }} component={OrderPreparingScreen} />
-      <Stack.Screen name="Delivery" options={{ presentation: 'fullScreenModal' }} component={DeliveryScreen} />
-      <Stack.Screen name="LoginScreen" component={LoginScreen} />
-      <Stack.Screen name="Register" component={RegisterScreen} />
-      <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
-      <Stack.Screen name="Profile" component={ProfileScreen} />
-      <Stack.Screen name="Location" options={{ presentation: 'modal' }} component={LocationScreen} />
-      <Stack.Screen name="Welcome" component={WelcomeScreen} />
+      <Stack.Screen name="Home" component={HomeScreen} options={{headerShown: false}}/>
+      <Stack.Screen name="Shop" component={ShopScreen} options={{headerShown: false}}/>
+      <Stack.Screen name="Cart" options={{ presentation: 'modal', headerShown: false }} component={CartScreen} />
+      <Stack.Screen name="AllShopsScreen" component={AllShopsScreen} options={{headerShown: false}}/>
+      <Stack.Screen name="ShopsByCategory" component={ShopsByCategoryScreen} options={{headerShown: false}}/>
+      <Stack.Screen name="OrderPreparing" options={{ presentation: 'fullScreenModal', headerShown: false }} component={OrderPreparingScreen} />
+      <Stack.Screen name="Delivery" options={{ presentation: 'fullScreenModal', headerShown: false }} component={DeliveryScreen} />
+      <Stack.Screen name="LoginScreen" component={LoginScreen} options={{headerShown: false}}/>
+      <Stack.Screen name="Register" component={RegisterScreen} options={{headerShown: false}}/>
+      <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} options={{headerShown: false}}/>
+      <Stack.Screen name="Profile" component={ProfileScreen} options={{headerShown: false}}/>
+      <Stack.Screen name="Location" options={{ presentation: 'modal' , headerShown: false}} component={LocationScreen} />
+      <Stack.Screen name="Welcome" component={WelcomeScreen} options={{headerShown: false}}/>
+      <Stack.Screen name="HistoryPurchase" component={HistoryPurchaseScreen} options={{headerShown: false}}/>
     </Stack.Navigator>
   );
 }

@@ -1,96 +1,70 @@
-// HistoryPurchaseScreen.js
-import React, { useEffect, useState } from 'react';
-import { View, Text, FlatList, StyleSheet } from 'react-native';
-import { firebase } from '../config';
+import React, { useEffect, useState } from "react";
+import { View, Text, ScrollView, TouchableOpacity, Image } from "react-native";
+import { firebase } from "../config";
+import { SafeAreaView } from "react-native-safe-area-context";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from "@react-navigation/native";
+import * as Icon from "react-native-feather";
+import { themeColors } from "../themes";
+
 export default function HistoryPurchaseScreen() {
-  const [purchaseHistory, setPurchaseHistory] = useState([]);
+  const [orders, setOrders] = useState([]); 
+  const navigation = useNavigation();
+
+  const fetchOrders = async () => { 
+    try {
+      const userString = await AsyncStorage.getItem('user');
+      const user = userString ? JSON.parse(userString) : null;
+      if (user) {
+        const ordersSnapshot = await firebase.firestore()
+          .collection('orders')
+          .where('userId', '==', user.uid)
+          .get();
+        const fetchedOrders = ordersSnapshot.docs.map(doc => {
+          const data = doc.data();
+          data.timestamp = data.timestamp.toDate();
+          return data;
+        });
+        setOrders(fetchedOrders);
+      }
+    } catch (error) {
+      console.error("Error fetching orders: ", error);
+    }
+  };
 
   useEffect(() => {
-      const fetchPurchaseHistory = async () => {
-          try {
-              // Get user ID from Firebase authentication
-              const userId = firebase.auth().currentUser.uid;
-
-              // Fetch purchase history data from Firebase
-              const snapshot = await firebase.database().ref('purchaseHistory').orderByChild('userId').equalTo(userId).once('value');
-              const data = snapshot.val();
-
-              if (data) {
-                  // Convert data object into array
-                  const historyArray = Object.values(data);
-                  setPurchaseHistory(historyArray);
-              }
-          } catch (error) {
-              console.error('Error fetching purchase history:', error);
-          }
-      };
-
-      fetchPurchaseHistory();
+    fetchOrders();
   }, []);
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.header}>Purchase History</Text>
-      <FlatList
-        data={purchaseHistory}
-        keyExtractor={(item, index) => index.toString()}
-        renderItem={({ item }) => (
-          <View style={styles.item}>
-            <Text style={styles.shopName}>{item.shop.name}</Text>
-            <Text style={styles.shopAddress}>{item.shop.address}</Text>
-            <Text style={styles.userLocation}>
-              Your Location: {item.userLocation.latitude}, {item.userLocation.longitude}
-            </Text>
-            {item.items.map((product, index) => (
-              <View key={index} style={styles.product}>
-                <Text style={styles.productName}>{product.productName}</Text>
-                <Text style={styles.productQuantity}>Quantity: {product.quantity}</Text>
-              </View>
-            ))}
+    <SafeAreaView className="flex-1 bg-white">
+      <View className="p-4 border-b border-gray-300">
+        <Text className="text-2xl font-bold text-center">Order History</Text>
+      </View>
+      <TouchableOpacity
+        onPress={()=> navigation.goBack()}
+        className="absolute top-14 left-4 bg-gray-50 p-2 rounded-full shadow"
+        >
+          <Icon.ArrowLeft strokeWidth={3} stroke={themeColors.bgColor(1)}/>
+      </TouchableOpacity>
+      <ScrollView className="flex-1 p-4">
+        {orders.map((order, index) => (
+          <View key={index} className="mb-4 p-4 border rounded-lg shadow-sm">
+            <Text className="font-bold text-lg">Order from {order.shopName}</Text>
+            <Text className="mt-2">Total: ${order.total}</Text>
+            <Text className="mt-2">Address: {order.address}</Text>
+            <Text className="mt-2">Date: {order.timestamp.toLocaleDateString()}</Text>
+            <View className="mt-2">
+              {order.items.map((item, idx) => (
+                <View key={idx} className="flex-row items-center mb-2">
+                  <Image source={{ uri: item.image }} className="w-12 h-12 mr-2 rounded" />
+                  <Text className="text-gray-600">{item.name} x {item.quantity}</Text>
+                </View>
+              ))}
+            </View>
           </View>
-        )}
-      />
-    </View>
+        ))}
+      </ScrollView>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 20,
-    backgroundColor: '#fff',
-  },
-  header: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  item: {
-    marginBottom: 20,
-    padding: 15,
-    backgroundColor: '#f9f9f9',
-    borderRadius: 10,
-  },
-  shopName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  shopAddress: {
-    fontSize: 16,
-    color: '#555',
-  },
-  userLocation: {
-    fontSize: 14,
-    color: '#888',
-  },
-  product: {
-    marginTop: 10,
-  },
-  productName: {
-    fontSize: 16,
-  },
-  productQuantity: {
-    fontSize: 14,
-    color: '#555',
-  },
-});
