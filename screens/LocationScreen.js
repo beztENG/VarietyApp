@@ -55,7 +55,7 @@ export default function LocationScreen() {
     };
 
     const storeOrder = async (userLocation) => {
-        try {
+        try { 
             const userString = await AsyncStorage.getItem('user'); 
             const user = userString ? JSON.parse(userString) : null;
             if (user) {

@@ -10,6 +10,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useDispatch } from 'react-redux';
 import { setShop } from '../redux/shopSlice';
 import { urlFor } from '../sanity';
+import { EmptyCart } from '../redux/cartSlice';
 
  
 export default function ShopScreen(){
@@ -23,6 +24,11 @@ export default function ShopScreen(){
             dispatch(setShop({...item}))
         }
     }, [])
+
+    const cancelOrder = () => {
+        navigation.navigate('Home');
+        dispatch(EmptyCart());
+    };
     return(
         <View>
             <CartIcon/>
@@ -31,7 +37,7 @@ export default function ShopScreen(){
                 <View className="relative">
                     <Image className="w-full h-72" source={{uri: urlFor(item.image).url()}}/>
                     <TouchableOpacity
-                    onPress={()=> navigation.goBack()}
+                    onPress={cancelOrder}
                     className="absolute top-14 left-4 bg-gray-50 p-2 rounded-full shadow"
                     >
                         <Icon.ArrowLeft strokeWidth={3} stroke={themeColors.bgColor(1)}/>

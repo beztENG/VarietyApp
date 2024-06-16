@@ -5,6 +5,7 @@ import { store } from './store';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import {LogBox} from 'react-native'
+import 'react-native-gesture-handler';
 
 const Stack = createNativeStackNavigator();
 

@@ -38,30 +38,40 @@ export default function HistoryPurchaseScreen() {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      <View className="p-4 border-b border-gray-300">
-        <Text className="text-2xl font-bold text-center">Order History</Text>
+      <View className="px-4 py-5 bg-green-500 shadow-md"> 
+        <Text className="text-white text-2xl font-bold text-center">Order History</Text>
       </View>
+
       <TouchableOpacity
-        onPress={()=> navigation.goBack()}
-        className="absolute top-14 left-4 bg-gray-50 p-2 rounded-full shadow"
+          onPress={() => navigation.openDrawer()}
+          className="absolute top-5 left-2 bg-gray-200 p-2 rounded-full shadow"
+          style={{top: 40, left: 15}}
         >
-          <Icon.ArrowLeft strokeWidth={3} stroke={themeColors.bgColor(1)}/>
-      </TouchableOpacity>
-      <ScrollView className="flex-1 p-4">
+          <Icon.Menu strokeWidth={3} stroke={themeColors.bgColor(1)} />
+        </TouchableOpacity>
+
+      <ScrollView className="px-4 pt-5">
         {orders.map((order, index) => (
-          <View key={index} className="mb-4 p-4 border rounded-lg shadow-sm">
-            <Text className="font-bold text-lg">Order from {order.shopName}</Text>
-            <Text className="mt-2">Total: ${order.total}</Text>
-            <Text className="mt-2">Address: {order.address}</Text>
-            <Text className="mt-2">Date: {order.timestamp.toLocaleDateString()}</Text>
-            <View className="mt-2">
-              {order.items.map((item, idx) => (
-                <View key={idx} className="flex-row items-center mb-2">
-                  <Image source={{ uri: item.image }} className="w-12 h-12 mr-2 rounded" />
-                  <Text className="text-gray-600">{item.name} x {item.quantity}</Text>
-                </View>
-              ))}
+          <View 
+            key={index} 
+            className="mb-4 p-4 bg-white rounded-lg shadow-md" 
+          >
+            <View className="flex-row justify-between items-center mb-2">
+              <Text className="font-bold text-lg text-gray-800">#{index + 1} Order from {order.shopName}</Text>
+              <Text className="text-green-500">${order.total}</Text> 
             </View>
+            <Text className="text-gray-600 mb-2">{order.address}</Text>
+            <Text className="text-gray-500">{order.timestamp.toLocaleDateString()}</Text>
+
+            {order.items.map((item, idx) => (
+              <View key={idx} className="flex-row items-center mt-2">
+                <Image 
+                  source={{ uri: item.image }} 
+                  className="w-12 h-12 rounded-full mr-2"
+                />
+                <Text className="text-gray-700">{item.name} x {item.quantity}</Text>
+              </View>
+            ))}
           </View>
         ))}
       </ScrollView>

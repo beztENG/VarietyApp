@@ -91,13 +91,11 @@ export default function ProfileScreen() {
       uploadTask.on(
         'state_changed',
         (snapshot) => {
-          // Có thể thực hiện các hành động theo tiến trình tải lên ở đây nếu cần
         },
         (error) => {
           Alert.alert('Error uploading image', error.message);
         },
         async () => {
-          // Tải ảnh lên thành công, cập nhật URL hình ảnh mới
           const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
           updateUserProfileImage(downloadURL, uid);
         }
@@ -116,12 +114,10 @@ export default function ProfileScreen() {
         profileImage: downloadURL,
       })
       .then(() => {
-        // Cập nhật thành công, cập nhật hình ảnh trên giao diện
         setProfileImage(downloadURL);
         Alert.alert('Profile image updated successfully');
       })
       .catch((error) => {
-        // Xảy ra lỗi khi cập nhật
         Alert.alert('Error updating profile image', error.message);
       });
   };
@@ -156,9 +152,16 @@ export default function ProfileScreen() {
     navigation.navigate('Welcome');
   };
 
+  const handleGoBack = () => {
+    navigation.goBack();
+  };
+
   return (
     <SafeAreaView className="flex-1 bg-white">
       <ScrollView contentContainerStyle={{ flexGrow: 1 }} className="p-4">
+      <TouchableOpacity onPress={handleGoBack} >
+          <Icon.ArrowLeft strokeWidth={3} stroke={themeColors.bgColor(1)} />
+      </TouchableOpacity>
         <View className="flex-row justify-center mb-5">
           <TouchableOpacity onPress={handleImagePick}>
             <Image 
@@ -193,13 +196,7 @@ export default function ProfileScreen() {
           <TouchableOpacity className="py-3 bg-yellow-400 rounded-xl mt-5" onPress={handleUpdateProfile}>
             <Text className="font-xl font-bold text-center text-gray-700">Update Profile</Text>
           </TouchableOpacity>
-          <TouchableOpacity className="py-3 bg-red-400 rounded-xl mt-5" onPress={handleLogout}>
-            <Text className="font-xl font-bold text-center text-white">Logout</Text>
-          </TouchableOpacity>
         </View>
-        <TouchableOpacity onPress={() => navigation.navigate('HistoryPurchase')} className="mt-4 p-3 rounded-full bg-green-500">
-          <Text className="text-white text-center font-bold text-lg">View Purchase History</Text>
-        </TouchableOpacity> 
       </ScrollView>
     </SafeAreaView>
   );

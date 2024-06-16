@@ -37,7 +37,13 @@ export default function HomeScreen() {
       <StatusBar barStyle="dark-content" />
       <View className="p-4 border-b border-gray-300">
         <View className="flex-row items-center justify-between">
-          <View className="flex-row items-center border rounded-full overflow-hidden flex-1 mr-4">
+          <TouchableOpacity
+            onPress={() => navigation.openDrawer()}
+            className="bg-gray-50 p-2 rounded-full shadow"
+          >
+            <Icon.Menu strokeWidth={3} stroke={themeColors.bgColor(1)} />
+          </TouchableOpacity>
+          <View className="flex-row items-center border rounded-full overflow-hidden flex-1 mx-4">
             <Icon.Search height="25" width="25" stroke="gray" className="ml-3" />
             <TextInput
               placeholder="Search shops"
