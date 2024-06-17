@@ -11,13 +11,13 @@ export default function Categories() {
   const [categories, setCategories] = useState([]);
 
   useEffect(() => {
-    getCategories().then(data => {      
+    getCategories().then(data => {
       setCategories(data);
     });
   }, []);
 
   const handleCategoryPress = (categoryId) => {
-    navigation.navigate('ShopsByCategory', { categoryId }); // Chuyển đến ShopsByCategoryScreen với ID category
+    navigation.navigate('ShopsByCategory', { categoryId });
   };
 
   return (
@@ -29,22 +29,29 @@ export default function Categories() {
         contentContainerStyle={{ paddingHorizontal: 15 }}
       >
         {categories.map((category, index) => {
-          let isActive = category._id === activeCategory;
-          let btnClass = isActive ? 'bg-gray-600' : 'bg-gray-200';
-          let textClass = isActive ? 'font-semibold text-gray-800' : 'text-gray-500';
-
+          const isActive = category._id === activeCategory;
           return (
-            <View key={index} className="mr-6">
-              <TouchableOpacity
-                className={`p-1 rounded-full shadow ` + btnClass}
-                onPress={() => handleCategoryPress(category._id)}
+            <TouchableOpacity
+              key={index} 
+              className="mr-6 flex items-center"
+              onPress={() => {
+                setActiveCategory(category._id); // Update active category
+                handleCategoryPress(category._id);
+              }}
+            >
+              <View 
+                className={`p-2 rounded-full shadow-md `} 
+                style={{ borderWidth: 2, borderColor: isActive ? 'transparent' : '#ddd' }} // Add border
               >
                 <Image
-                  style={{ width: 45, height: 45 }}
+                  style={{ width: 50, height: 50, borderRadius: 25 }} // Make image round
                   source={{ uri: urlFor(category.image).url() }}
                 />
-              </TouchableOpacity>
-            </View>
+              </View>
+              <Text className={`text-center mt-1 font-medium`}> 
+                {category.name}
+              </Text>
+            </TouchableOpacity>
           );
         })}
       </ScrollView>

@@ -25,7 +25,7 @@ export default function ShopsByCategoryScreen({ route }) {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: themeColors.bgColor() }}>
+    <View style={{ flex: 1, backgroundColor: themeColors.bgColor(), marginTop: 50 }}>
       <ScrollView contentContainerStyle={{ paddingVertical: 20, paddingHorizontal: 15 }}>
         <View >
           {shops.map((shop, index) => (

@@ -14,7 +14,8 @@ export default function ShopCard2({ item }) {
             <View
                 style={{
                     shadowColor: themeColors.bgColor(0.2),
-                    shadowRadius: 7
+                    shadowRadius: 7,
+                    marginTop: 50
                 }}
                 className="mx-4 bg-white rounded-3xl shadow-lg overflow-hidden"
             >

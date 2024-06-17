@@ -1,5 +1,15 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { 
+    View, 
+    Text, 
+    TextInput, 
+    TouchableOpacity, 
+    Alert,
+    Image,
+    KeyboardAvoidingView,
+    Platform  // Import Platform
+
+} from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import axios from 'axios';
 import { themeColors } from '../themes';
@@ -114,32 +124,47 @@ export default function LocationScreen() {
     };
 
     return (
-        <View className="flex-1 p-4 bg-white">
-            <TouchableOpacity
-                onPress={() => navigation.goBack()}
-                style={{ backgroundColor: themeColors.bgColor(1) }}
-                className="absolute z-10 rounded-full p-1 shadow top-5 left-2"
-            >
-                <Icon.ArrowLeft strokeWidth={3} stroke="white" />
-            </TouchableOpacity>
-            <View className="mt-8">
-                <Text className="text-xl font-bold text-center">Enter your delivery address</Text>
-                <Text className="text-center text-gray-500 mt-2">{shopName}</Text>
-                <TextInput
-                    value={address}
-                    onChangeText={setAddress}
-                    placeholder="e.g. 123 Main St, Springfield"
-                    className="border p-2 mt-4 rounded"
-                />
+        <KeyboardAvoidingView 
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            className="flex-1 bg-white"
+        >
+            <View className="px-4 py-8 flex-1 items-center justify-center">
                 <TouchableOpacity
-                    onPress={handleLocationSubmit}
-                    style={{ backgroundColor: themeColors.bgColor(1) }}
-                    className="p-3 mt-4 rounded-full"
-                    disabled={loading}
+                    onPress={() => navigation.goBack()}
+                    className="absolute top-5 left-2 bg-gray-200 p-2 rounded-full shadow"
                 >
-                    <Text className="text-white text-center font-bold text-lg">{loading ? 'Loading...' : 'Confirm Location'}</Text>
+                    <Icon.ArrowLeft strokeWidth={3} stroke="black" />
                 </TouchableOpacity>
+
+                <Image
+                    source={require('../assets/logo.png')} // Replace with your image
+                    className="w-40 h-40 mb-4"
+                />
+
+                <Text className="text-xl font-bold text-center mb-2">Enter your delivery address</Text>
+                <Text className="text-center text-gray-500">{shopName}</Text>
+
+                <View className="mt-6 w-full">
+                    <TextInput
+                        value={address}
+                        onChangeText={setAddress}
+                        placeholder="Enter your address"
+                        className="border border-gray-300 p-4 rounded-lg shadow-sm w-full"
+                    />
+
+                    <TouchableOpacity
+                        onPress={handleLocationSubmit}
+                        className={`p-3 rounded-lg shadow mt-4 ${loading ? 'bg-gray-400' : 'bg-green-500'} w-full`}
+                        disabled={loading}
+                        style={{ backgroundColor: themeColors.bgColor(1) }}
+
+                    >
+                        <Text className="text-white text-center font-bold text-lg" >
+                            {loading ? 'Loading...' : 'Confirm Location'}
+                        </Text>
+                    </TouchableOpacity>
+                </View>
             </View>
-        </View>
+        </KeyboardAvoidingView>
     );
 }
